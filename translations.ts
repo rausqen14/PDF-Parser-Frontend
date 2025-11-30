@@ -1,0 +1,297 @@
+
+import { Language } from './types';
+
+export const translations = {
+  en: {
+    sidebar: {
+      title: "GenAI Architect",
+      subtitle: "Mortgage Automation Suite",
+      logicTasks: "Logic Tasks",
+      interactive: "Interactive",
+      systemOnline: "System Online",
+      task1: "1. Labeling",
+      task2: "2. Classification",
+      task3: "3. Extraction",
+      task5: "4. Triangulation",
+      demo: "Live Pipeline Demo"
+    },
+    task1: {
+      tagline: "Task 1",
+      title: "Page Label Representation",
+      subtitle: "Defining the atomic unit of a mortgage document package.",
+      card1Title: "What does it mean to label a page?",
+      card1Text: "In this context, labeling is the process of assigning a **semantic document type** (e.g., 'Note' or 'Tax Record') to each physical page of the PDF.",
+      card1NoteTitle: "Why page-level?",
+      card1NoteText: "Mortgage packages often arrive as a single giant PDF (100+ pages). We must identify *what* each page is before grouping them into logical documents.",
+      card2Title: "Why this JSON structure?",
+      point1Title: "Readability:",
+      point1Text: "JSON is standard, self-describing, and easy for engineers to debug.",
+      point2Title: "Downstream:",
+      point2Text: "Easy to 'stitch' consecutive pages with the same label into a single logical document.",
+      point3Title: "Metadata:",
+      point3Text: "Fields like `is_start_page` handle cases where two different 'Notes' appear back-to-back.",
+      codeHeader: "Proposed Data Structure",
+      codeCaption: "Per-Page JSON Object",
+      nextButton: "Next: Classification Strategy"
+    },
+    task2: {
+      tagline: "Task 2",
+      title: "Classification Prompt Design",
+      subtitle: "Designing a robust prompt to categorize pages with high accuracy.",
+      designLogic: "Design Logic",
+      logic1Title: "Constrained Choice",
+      logic1Text: "We force the LLM to choose from a specific list (Enum). This prevents it from inventing new categories like 'Mortgage Paper'.",
+      logic2Title: "Confidence Scores",
+      logic2Text: "Requesting a 0-1 confidence score is vital. It allows us to route low-confidence pages (e.g., < 0.7) to human review.",
+      logic3Title: "The 'Unknown' Label",
+      logic3Text: "Critical for filtering out junk (blank pages, fax covers) without generating false positives.",
+      promptPreview: "System Prompt Preview",
+      output: "OUTPUT",
+      nextButton: "Next: Processing Pipeline"
+    },
+    task3: {
+      tagline: "Task 3",
+      title: "Processing & Extraction Strategy",
+      subtitle: "Balancing cost, speed, and accuracy in a multi-page pipeline.",
+      sectionA: "A. The 'Classify-Then-Extract' Pipeline",
+      step1Title: "Page Classification",
+      step1Text: "Classify every page individually. This is cheap and fast.",
+      step2Title: "Logical Grouping",
+      step2Text: "Bundle consecutive 'Note' pages (e.g., Pg 7-10) into one packet.",
+      step3Title: "Targeted Extraction",
+      step3Text: "Send ONLY the 'Note' packet to the LLM to extract the Interest Rate.",
+      whyApproach: "Why this approach?",
+      whyText: "Context windows are large (1M+ tokens), but 'noise' is dangerous. Sending 100 pages of irrelevant disclosures when you just need the Loan Amount from the Note increases hallucination risk. Grouping first ensures the model only sees relevant text.",
+      sectionB: "B. Extraction Prompt Design",
+      promptDesignText: "The prompt must be **Document-Type Specific**. If we identified the document as a 'Note', we trigger the 'Note Extraction Prompt'.",
+      check1: "Specific field definitions (e.g. 'Remove dashes')",
+      check2: "Null handling (Return null if not found)",
+      check3: "No markdown, pure JSON output",
+      nextButton: "Next: Triangulation Logic"
+    },
+    task5: {
+      tagline: "Task 4",
+      title: "Loan-Level Triangulation",
+      subtitle: "Resolving conflicts when multiple documents disagree.",
+      challengeTitle: "The Challenge",
+      challengeText: "A 'Loan Amount' might appear in 10 different documents. The Note might say $392,000 while an old Application says $395,000. We cannot just take the most frequent value; we must trust legal authority.",
+      hierarchyTitle: "Source of Truth Hierarchy",
+      tableField: "Field",
+      tablePrimary: "Primary Source (Gold)",
+      tableSecondary: "Secondary Source",
+      row1Field: "Loan Amount",
+      row1Primary: "Promissory Note",
+      row1Secondary: "Closing Disclosure (CD)",
+      row2Field: "Property Address",
+      row2Primary: "Rider / Security Instrument",
+      row2Secondary: "Appraisal",
+      row3Field: "Borrower Name",
+      row3Primary: "Signature Affidavit",
+      row3Secondary: "1003 Application",
+      logicTitle: "Reconciliation Logic",
+      logic1: "Normalization: Standardize '123 Main St.' vs '123 Main Street'.",
+      logic2: "Weighted Voting: If 'Note' exists, its value for 'Loan Amount' overrides all others (Weight: 10).",
+      logic3: "Exception Handling: If 'Note' and 'CD' differ significantly, flag for human review.",
+      startButton: "Launch Live Demo"
+    },
+    demo: {
+      tagline: "Interactive Demo",
+      title: "Document Processing Pipeline",
+      systemActive: "System Active",
+      steps: {
+        input: "Input",
+        classification: "Classification",
+        extraction: "Extraction",
+        triangulation: "Triangulation"
+      },
+      step1: {
+        title: "Input Data",
+        subtitle: "Upload a PDF or use sample data to start the pipeline.",
+        dragDrop: "Drag and drop your PDF file here",
+        orClick: "or click to browse",
+        supported: "Supports PDF (Max 10MB)",
+        simulating: "Simulating OCR Scanning...",
+        analyzing: "Analyzing document structure...",
+        pagesLoaded: "Pages Loaded",
+        source: "PDF Source"
+      },
+      step2: {
+        processing: "LLM Classification Running...",
+        processingDesc: "Each page text is being analyzed by the model using the prompt from Task 2 to determine document type.",
+        predicted: "Predicted Label",
+        confidence: "Confidence",
+        high: "High",
+        review: "Review"
+      },
+      step3: {
+        log: "Initiating Targeted Extraction Protocols...",
+        log2: "Extracting key fields (Borrower, Loan #, Address)...",
+        page: "Page"
+      },
+      step4: {
+        success: "Triangulation Complete",
+        successDesc: "The system has reconciled conflicting data across pages using the 'Source of Truth' hierarchy logic.",
+        finalRecord: "Final Loan Record",
+        notFound: "Not Found",
+        source: "Source",
+        confidence: "Confidence",
+        decisionLog: "Decision Log",
+        resolving: "Resolving",
+        high: "High",
+        medium: "Medium",
+        none: "None"
+      },
+      buttons: {
+        prev: "Previous",
+        next: "Next Step",
+        complete: "Analysis Complete"
+      }
+    }
+  },
+  tr: {
+    sidebar: {
+      title: "GenAI Mimar",
+      subtitle: "İpotek Otomasyon Paketi",
+      logicTasks: "Mantıksal Görevler",
+      interactive: "İnteraktif",
+      systemOnline: "Sistem Aktif",
+      task1: "1. Etiketleme",
+      task2: "2. Sınıflandırma",
+      task3: "3. Çıkarma",
+      task5: "4. Üçgenleme",
+      demo: "Canlı Hat Demosu"
+    },
+    task1: {
+      tagline: "Görev 1",
+      title: "Sayfa Etiketi Temsili",
+      subtitle: "Bir ipotek belge paketinin atomik birimini tanımlama.",
+      card1Title: "Bir sayfayı etiketlemek ne anlama gelir?",
+      card1Text: "Bu bağlamda etiketleme, PDF'in her bir fiziksel sayfasına **anlamsal bir belge türü** (örneğin, 'Senet' veya 'Vergi Kaydı') atama işlemidir.",
+      card1NoteTitle: "Neden sayfa düzeyinde?",
+      card1NoteText: "İpotek paketleri genellikle 100+ sayfalık tek bir dev PDF olarak gelir. Bunları mantıksal belgelere gruplamadan önce her sayfanın *ne olduğunu* tanımlamalıyız.",
+      card2Title: "Neden bu JSON yapısı?",
+      point1Title: "Okunabilirlik:",
+      point1Text: "JSON standarttır, kendini açıklar ve mühendislerin hata ayıklaması kolaydır.",
+      point2Title: "Sonraki İşlemler:",
+      point2Text: "Aynı etikete sahip ardışık sayfaları tek bir mantıksal belgede 'birleştirmek' (stitching) kolaydır.",
+      point3Title: "Metadata:",
+      point3Text: "`is_start_page` (başlangıç sayfası mı) gibi alanlar, iki farklı 'Senet'in arka arkaya geldiği durumları yönetmemizi sağlar.",
+      codeHeader: "Önerilen Veri Yapısı",
+      codeCaption: "Sayfa Başına JSON Nesnesi",
+      nextButton: "Sonraki: Sınıflandırma Stratejisi"
+    },
+    task2: {
+      tagline: "Görev 2",
+      title: "Sınıflandırma İstemi (Prompt) Tasarımı",
+      subtitle: "Sayfaları yüksek doğrulukla kategorize etmek için sağlam bir istem tasarlama.",
+      designLogic: "Tasarım Mantığı",
+      logic1Title: "Kısıtlanmış Seçim (Constrained Choice)",
+      logic1Text: "LLM'i belirli bir listeden (Enum) seçim yapmaya zorluyoruz. Bu, modelin 'İpotek Kağıdı' gibi yeni kategoriler uydurmasını engeller.",
+      logic2Title: "Güven Skorları (Confidence Scores)",
+      logic2Text: "0-1 arası bir güven skoru istemek hayati önem taşır. Bu, düşük güvenli sayfaları (örn. < 0.7) insan incelemesine yönlendirmemizi sağlar.",
+      logic3Title: "'Bilinmeyen' Etiketi",
+      logic3Text: "Gereksiz sayfaları (boş sayfalar, faks kapakları) yanlış pozitifler üretmeden elemek için kritik öneme sahiptir.",
+      promptPreview: "Sistem İstemi Önizlemesi",
+      output: "ÇIKTI (OUTPUT)",
+      nextButton: "Sonraki: İşleme Hattı"
+    },
+    task3: {
+      tagline: "Görev 3",
+      title: "İşleme ve Çıkarma Stratejisi",
+      subtitle: "Çok sayfalı bir hatta maliyet, hız ve doğruluğu dengeleme.",
+      sectionA: "A. 'Sınıflandır-Sonra-Çıkar' Hattı",
+      step1Title: "Sayfa Sınıflandırma",
+      step1Text: "Her sayfayı ayrı ayrı sınıflandırın. Bu yöntem ucuz ve hızlıdır.",
+      step2Title: "Mantıksal Gruplama",
+      step2Text: "Ardışık 'Senet' sayfalarını (örn. Sf 7-10) tek bir pakette birleştirin.",
+      step3Title: "Hedefli Çıkarma",
+      step3Text: "Faiz oranını çıkarmak için SADECE 'Senet' paketini LLM'e gönderin.",
+      whyApproach: "Neden bu yaklaşım?",
+      whyText: "Bağlam pencereleri geniştir (1M+ token), ancak 'gürültü' tehlikelidir. Sadece Senet'ten Kredi Tutarını almanız gerekirken 100 sayfalık alakasız beyanları göndermek, halüsinasyon riskini artırır. Önce gruplamak, modelin yalnızca ilgili metni görmesini sağlar.",
+      sectionB: "B. Çıkarma İstemi Tasarımı",
+      promptDesignText: "İstem, **Belge Türüne Özgü** olmalıdır. Eğer belgeyi 'Senet' olarak tanımladıysak, 'Senet Çıkarma İstemi'ni tetikleriz.",
+      check1: "Spesifik alan tanımları (örn. 'Tireleri kaldır')",
+      check2: "Boş değer yönetimi (Bulunamazsa null döndür)",
+      check3: "Markdown yok, saf JSON çıktısı",
+      nextButton: "Sonraki: Üçgenleme Mantığı"
+    },
+    task5: {
+      tagline: "Görev 4",
+      title: "Kredi Düzeyinde Üçgenleme",
+      subtitle: "Birden fazla belge uyuşmadığında çakışmaları çözme.",
+      challengeTitle: "Zorluk",
+      challengeText: "Bir 'Kredi Tutarı' 10 farklı belgede görünebilir. Senet $392,000 derken, eski bir Başvuru Formu $395,000 diyebilir. En sık geçen değeri alıp geçemeyiz; yasal otoriteye güvenmeliyiz.",
+      hierarchyTitle: "Doğruluk Kaynağı Hiyerarşisi",
+      tableField: "Alan",
+      tablePrimary: "Birincil Kaynak (Altın)",
+      tableSecondary: "İkincil Kaynak",
+      row1Field: "Kredi Tutarı",
+      row1Primary: "Senet (Rate Note)",
+      row1Secondary: "Kapanış Beyanı (CD)",
+      row2Field: "Mülk Adresi",
+      row2Primary: "Ek Belge (Rider)",
+      row2Secondary: "Ekspertiz (Appraisal)",
+      row3Field: "Borçlu Adı",
+      row3Primary: "İmza Beyanı (Affidavit)",
+      row3Secondary: "1003 Başvuru Formu",
+      logicTitle: "Uzlaştırma Mantığı",
+      logic1: "Normalizasyon: '123 Main St.' ve '123 Main Street' gibi farklı yazımları standart bir formata dönüştürün.",
+      logic2: "Ağırlıklı Oylama: Eğer Senet (Note) mevcutsa, 'Kredi Tutarı' için onun değeri diğer tüm değerleri geçersiz kılar (Ağırlık: 10).",
+      logic3: "İstisna Yönetimi: Eğer 'Senet' ve 'Kapanış Beyanı' önemli ölçüde farklıysa, insan incelemesi için bayrak kaldırın.",
+      startButton: "Canlı Demoyu Başlat"
+    },
+    demo: {
+      tagline: "İnteraktif Demo",
+      title: "Belge İşleme Hattı",
+      systemActive: "Sistem Aktif",
+      steps: {
+        input: "Girdi",
+        classification: "Sınıflandırma",
+        extraction: "Çıkarma",
+        triangulation: "Üçgenleme"
+      },
+      step1: {
+        title: "Girdi Verisi",
+        subtitle: "İşleme hattını başlatmak için bir PDF yükleyin veya örnek veriyi kullanın.",
+        dragDrop: "PDF dosyanızı buraya sürükleyip bırakın",
+        orClick: "veya seçmek için tıklayın",
+        supported: "PDF Desteklenir (Maks 10MB)",
+        simulating: "OCR Taraması Simüle Ediliyor...",
+        analyzing: "Belge yapısı analiz ediliyor...",
+        pagesLoaded: "Sayfa Yüklendi",
+        source: "PDF Kaynağı"
+      },
+      step2: {
+        processing: "LLM Sınıflandırma Çalışıyor...",
+        processingDesc: "Her sayfa metni, belge türünü belirlemek için Görev 2'deki istem (prompt) kullanılarak model tarafından analiz edilmektedir.",
+        predicted: "Tahmin Edilen Etiket",
+        confidence: "Güven",
+        high: "Yüksek",
+        review: "İncele"
+      },
+      step3: {
+        log: "Hedefli Çıkarma Protokolleri Başlatılıyor...",
+        log2: "Anahtar alanlar çıkarılıyor (Borçlu, Kredi #, Adres)...",
+        page: "Sayfa"
+      },
+      step4: {
+        success: "Üçgenleme Tamamlandı",
+        successDesc: "Sistem, sayfalar arasındaki çelişen verileri 'Doğruluk Kaynağı' hiyerarşisi mantığını kullanarak uzlaştırdı.",
+        finalRecord: "Nihai Kredi Kaydı",
+        notFound: "Bulunamadı",
+        source: "Kaynak",
+        confidence: "Güven",
+        decisionLog: "Karar Günlüğü",
+        resolving: "Çözümleniyor",
+        high: "Yüksek",
+        medium: "Orta",
+        none: "Yok"
+      },
+      buttons: {
+        prev: "Önceki",
+        next: "Sonraki Adım",
+        complete: "Analiz Tamamlandı"
+      }
+    }
+  }
+};
