@@ -10,7 +10,8 @@ import {
   BackendConfig,
 } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+// Prefer build-time Vite env; fall back to deployed API domain to avoid localhost in prod builds.
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() || 'https://pdf.hukcep.com';
 
 type StatusCallback = (status: PipelineJobStatus) => void;
 
